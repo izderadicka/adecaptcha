@@ -1,0 +1,31 @@
+plugin.video.online-files/resources/lib/ulozto.py
+@@ -24,6 +24,7 @@ import simplejson as json
+ from base64 import b64decode
+ from provider import ContentProvider
+ from provider import ResolveException
++from adecaptcha import clslib
+ 
+ class UloztoContentProvider(ContentProvider):
+ 
+@@ -181,12 +182,20 @@ class UloztoContentProvider(ContentProvider):
+                     item['surl'] = url
+                     return item
+ 
++    def _audio_catcha(self, audio_url):
++        resp=urllib2.urlopen(audio_url)
++        code=clslib.classify_mp3_file(resp, 
++                                    os.path.join(os.path.split(clslib.__file__)[0], 'ulozto.cfg'))
++        print "ULOZTO CAPTCHA is %s" % code
++        return code
++        
++    
+     def _get_file_url_anonymous(self,page,post_url,headers,captcha_cb):
+ 
+         captcha_id = re.search('<input type=\"hidden\" name=\"captcha_id\".+?value=\"([^\"]+)"',page,re.IGNORECASE | re.DOTALL).group(1)
+         # ask callback to provide captcha code
+         self.info('Asking for captcha')
+-        code = captcha_cb({'id':captcha_id,'img': 'http://img.uloz.to/captcha/%s.png' % captcha_id})
++        code = self._audio_catcha( 'http://img.uloz.to/captcha/sound/%s.mp3' % captcha_id)
+         if not code:
+             self.info('Captcha not provided, done')
+             return
