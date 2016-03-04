@@ -3,7 +3,9 @@ then breaking visual captchas.
 It was tested on uloz.to audio captchas (as of August 2014) - also included are modified plugins for pyload 
 - so no need to manually enter captchas for uloz.to site.
 
-Code is hosted on https://code.launchpad.net/~ivan-zderadicka/adecaptcha/trunk
+Code is hosted on https://github.com/izderadicka/adecaptcha
+
+( Old version https://code.launchpad.net/~ivan-zderadicka/adecaptcha/trunk)
 
 Some description (of older version) is here:   http://old.zderadicka.eu/adecaptcha.php
 
@@ -11,9 +13,9 @@ Some description (of older version) is here:   http://old.zderadicka.eu/adecaptc
 How to make it work (on linux) - uloz.to capchas recognition with PyLoad:
 ------------------------------------------------------------------------
 
-bzr checkout http://bazaar.launchpad.net/~ivan-zderadicka/adecaptcha/trunk/
+git clone https://github.com/izderadicka/adecaptcha.git 
 
-cd trunk/
+cd adecaptcha/
 
 sudo apt-get install build-essential python-dev python-numpy python-scipy python-pymad python-pip
 sudo pip install cython
