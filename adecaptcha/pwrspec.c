@@ -1250,6 +1250,8 @@ static char __pyx_k_start[] = "start";
 static char __pyx_k_zeros[] = "zeros";
 static char __pyx_k_arange[] = "arange";
 static char __pyx_k_around[] = "around";
+static char __pyx_k_astype[] = "astype";
+static char __pyx_k_double[] = "double";
 static char __pyx_k_hz2mel[] = "hz2mel";
 static char __pyx_k_import[] = "__import__";
 static char __pyx_k_mel2hz[] = "mel2hz";
@@ -1279,8 +1281,10 @@ static PyObject *__pyx_n_s_arange;
 static PyObject *__pyx_n_s_around;
 static PyObject *__pyx_n_s_arr;
 static PyObject *__pyx_n_s_array;
+static PyObject *__pyx_n_s_astype;
 static PyObject *__pyx_n_s_coefs;
 static PyObject *__pyx_n_s_dot;
+static PyObject *__pyx_n_s_double;
 static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_fbins;
 static PyObject *__pyx_n_s_fft;
@@ -1848,7 +1852,7 @@ static PyObject *__pyx_pf_10adecaptcha_7pwrspec_4fbins(CYTHON_UNUSED PyObject *_
  * 
  * def posbins(sr,slen, nbins=40):             # <<<<<<<<<<<<<<
  *     step=2.0*slen/sr
- *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.int))
+ *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.double))
  */
 
 /* Python wrapper */
@@ -1948,8 +1952,8 @@ static PyObject *__pyx_pf_10adecaptcha_7pwrspec_6posbins(CYTHON_UNUSED PyObject 
  * 
  * def posbins(sr,slen, nbins=40):
  *     step=2.0*slen/sr             # <<<<<<<<<<<<<<
- *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.int))
- *     return p
+ *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.double))
+ *     return p.astype(np.int)
  */
   __pyx_t_1 = PyNumber_Multiply(__pyx_float_2_0, __pyx_v_slen); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -1962,8 +1966,8 @@ static PyObject *__pyx_pf_10adecaptcha_7pwrspec_6posbins(CYTHON_UNUSED PyObject 
   /* "adecaptcha/pwrspec.pyx":17
  * def posbins(sr,slen, nbins=40):
  *     step=2.0*slen/sr
- *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.int))             # <<<<<<<<<<<<<<
- *     return p
+ *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.double))             # <<<<<<<<<<<<<<
+ *     return p.astype(np.int)
  * 
  */
   __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 17; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2024,7 +2028,7 @@ static PyObject *__pyx_pf_10adecaptcha_7pwrspec_6posbins(CYTHON_UNUSED PyObject 
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 17; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_int); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 17; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_double); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 17; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_9) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 17; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2046,14 +2050,47 @@ static PyObject *__pyx_pf_10adecaptcha_7pwrspec_6posbins(CYTHON_UNUSED PyObject 
 
   /* "adecaptcha/pwrspec.pyx":18
  *     step=2.0*slen/sr
- *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.int))
- *     return p             # <<<<<<<<<<<<<<
+ *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.double))
+ *     return p.astype(np.int)             # <<<<<<<<<<<<<<
  * 
  * def winspos(sr,slen, nbins=40):
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(__pyx_v_p);
-  __pyx_r = __pyx_v_p;
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_p, __pyx_n_s_astype); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_int); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+    }
+  }
+  if (!__pyx_t_2) {
+    __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_GOTREF(__pyx_t_9);
+  } else {
+    __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_2); __pyx_t_2 = NULL;
+    __Pyx_GIVEREF(__pyx_t_1);
+    PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_1);
+    __pyx_t_1 = 0;
+    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  }
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_r = __pyx_t_9;
+  __pyx_t_9 = 0;
   goto __pyx_L0;
 
   /* "adecaptcha/pwrspec.pyx":15
@@ -2061,7 +2098,7 @@ static PyObject *__pyx_pf_10adecaptcha_7pwrspec_6posbins(CYTHON_UNUSED PyObject 
  * 
  * def posbins(sr,slen, nbins=40):             # <<<<<<<<<<<<<<
  *     step=2.0*slen/sr
- *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.int))
+ *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.double))
  */
 
   /* function exit code */
@@ -2085,7 +2122,7 @@ static PyObject *__pyx_pf_10adecaptcha_7pwrspec_6posbins(CYTHON_UNUSED PyObject 
 }
 
 /* "adecaptcha/pwrspec.pyx":20
- *     return p
+ *     return p.astype(np.int)
  * 
  * def winspos(sr,slen, nbins=40):             # <<<<<<<<<<<<<<
  *     p=posbins(sr,slen,nbins)
@@ -2350,7 +2387,7 @@ static PyObject *__pyx_pf_10adecaptcha_7pwrspec_8winspos(CYTHON_UNUSED PyObject 
   goto __pyx_L0;
 
   /* "adecaptcha/pwrspec.pyx":20
- *     return p
+ *     return p.astype(np.int)
  * 
  * def winspos(sr,slen, nbins=40):             # <<<<<<<<<<<<<<
  *     p=posbins(sr,slen,nbins)
@@ -5379,8 +5416,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_around, __pyx_k_around, sizeof(__pyx_k_around), 0, 0, 1, 1},
   {&__pyx_n_s_arr, __pyx_k_arr, sizeof(__pyx_k_arr), 0, 0, 1, 1},
   {&__pyx_n_s_array, __pyx_k_array, sizeof(__pyx_k_array), 0, 0, 1, 1},
+  {&__pyx_n_s_astype, __pyx_k_astype, sizeof(__pyx_k_astype), 0, 0, 1, 1},
   {&__pyx_n_s_coefs, __pyx_k_coefs, sizeof(__pyx_k_coefs), 0, 0, 1, 1},
   {&__pyx_n_s_dot, __pyx_k_dot, sizeof(__pyx_k_dot), 0, 0, 1, 1},
+  {&__pyx_n_s_double, __pyx_k_double, sizeof(__pyx_k_double), 0, 0, 1, 1},
   {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
   {&__pyx_n_s_fbins, __pyx_k_fbins, sizeof(__pyx_k_fbins), 0, 0, 1, 1},
   {&__pyx_n_s_fft, __pyx_k_fft, sizeof(__pyx_k_fft), 0, 0, 1, 1},
@@ -5557,7 +5596,7 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * def posbins(sr,slen, nbins=40):             # <<<<<<<<<<<<<<
  *     step=2.0*slen/sr
- *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.int))
+ *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.double))
  */
   __pyx_tuple__13 = PyTuple_Pack(5, __pyx_n_s_sr, __pyx_n_s_slen, __pyx_n_s_nbins, __pyx_n_s_step, __pyx_n_s_p); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__13);
@@ -5565,7 +5604,7 @@ static int __Pyx_InitCachedConstants(void) {
   __pyx_codeobj__14 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_ivan_workspace_adecaptcha, __pyx_n_s_posbins, 15, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "adecaptcha/pwrspec.pyx":20
- *     return p
+ *     return p.astype(np.int)
  * 
  * def winspos(sr,slen, nbins=40):             # <<<<<<<<<<<<<<
  *     p=posbins(sr,slen,nbins)
@@ -5779,7 +5818,7 @@ PyMODINIT_FUNC PyInit_pwrspec(void)
  * 
  * def posbins(sr,slen, nbins=40):             # <<<<<<<<<<<<<<
  *     step=2.0*slen/sr
- *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.int))
+ *     p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.double))
  */
   __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_10adecaptcha_7pwrspec_7posbins, NULL, __pyx_n_s_adecaptcha_pwrspec); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -5787,7 +5826,7 @@ PyMODINIT_FUNC PyInit_pwrspec(void)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "adecaptcha/pwrspec.pyx":20
- *     return p
+ *     return p.astype(np.int)
  * 
  * def winspos(sr,slen, nbins=40):             # <<<<<<<<<<<<<<
  *     p=posbins(sr,slen,nbins)
