@@ -8,7 +8,7 @@ Created on Apr 18, 2010
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import sampletool_dialog
-import sys, os, os.path, audiolib, time, clslib
+import sys, os, os.path, audiolib, segmentation, time, clslib
 
 import pylab
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -48,13 +48,8 @@ class WorkerThread(QThread):
     done=pyqtSignal(str)
     error=pyqtSignal(str)
     
-    def __init__(self, items, dir, seg_size, threshold, silence):
+    def __init__(self):
         QThread.__init__(self)
-        self.items=items
-        self.dir=dir
-        self.seg_size=seg_size
-        self.threshold=threshold
-        self.silence=silence
         self.mutex=QMutex()
         self.canceled=False
     
@@ -86,17 +81,39 @@ class WorkerThread(QThread):
         
 class AnalyzeThread(WorkerThread):
     
-    def __init__(self, items, dir, seg_size, threshold, silence):
-        WorkerThread.__init__(self, items, dir, seg_size, threshold, silence)
+    def __init__(self, items, dir, parent):
+        WorkerThread.__init__(self)
+        self.items=items
+        self.dir=dir
+        self.parent=parent
         
  
     def do_work(self):  
-        res=audiolib.analyze_segments(self.items, self.dir, self.update_progress, self.seg_size, 
-                                           self.threshold, self.silence) 
+        res=audiolib.analyze_segments(self.items, self.dir, 
+                    progress_callback=self.update_progress, 
+                    seg_alg=self.parent.seg_alg.__name__, limit=self.parent.threshold, 
+                    params=self.parent.get_params(), 
+                    start_index=self.parent.start_index,
+                    end_index=self.parent.end_index
+                    ) 
         return res
         
         
-         
+def params_to_text(p):  
+    res=[]
+    for k in p:
+        res.append('%s=%f'%(k, p[k] or 0))      
+    return ', '.join(res)  
+
+def text_to_params(t):
+    res={}
+    for x in str(t).split(','):
+        e=x.strip().split('=')
+        if len(e)!= 2:
+            raise ValueError('Invalid expression %s'%x)
+        res[e[0].strip()]= float(e[1])
+    return res
+        
     
 class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
     def __init__(self, parent=None):
@@ -112,14 +129,31 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         self.setWindowTitle(TITLE)
         self.sizeEdit.setValidator(QIntValidator(self))
         self.tresholdEdit.setValidator(QDoubleValidator(self))
+        self.startEdit.setValidator(QDoubleValidator(self))
+        self.endEdit.setValidator(QDoubleValidator(self))
         self.startIndexEdit.setValidator(QIntValidator(self))
         self.endIndexEdit.setValidator(QIntValidator(self))
+        #segmentation alg 
+        self.seg_alg=None
+        self._algs=segmentation.list_algs()
+        self.algorithmCombo.addItems(zip(*self._algs)[0])
+        self.algorithmCombo.activated.connect(self.alg_changed)
+        
         self.restore_state()
         self.waveButton.setEnabled(False)
         self.playButton.setEnabled(False)
         self.analyze_thread=None
         self.analyze_dialog=None
         self._total_segments=0
+        
+    
+        
+        
+        
+    def alg_changed(self, idx):
+        print 'Algorithm changed to %s' % self._algs[idx][0]
+        self.seg_alg=self._algs[idx][1]
+        self.segparamsEdit.setText(params_to_text(self._algs[idx][1].alg_default_params))
         
     def analyze_samples(self):
         self.analyze_dialog=QProgressDialog('Analyzing samples ...', 'Abort', 0, len(self._items), parent=self)
@@ -164,22 +198,45 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         self.autoplayCheckBox.setChecked(settings.value('autoplay').toBool()  or False)
         self.startIndexEdit.setText(settings.value('startIndex').toString() or '')
         self.endIndexEdit.setText(settings.value('endIndex').toString() or '')
+        self.startEdit.setText(settings.value('start').toString() or '')
+        self.endEdit.setText(settings.value('end').toString() or '')
         
         stored_dir= unicode(settings.value('dir').toString())
         if os.path.isdir(stored_dir):
             self.directoryEdit.setText(stored_dir)
             QTimer.singleShot(100,self.on_directoryEdit_editingFinished)
+            
+        segalg=settings.value('segalg').toString()
+        segalg_index=None
+        for i, (_, f) in enumerate(self._algs):
+            if segalg==f.__name__:
+                segalg_index=i
+                
+        if segalg_index is None:
+            self.algorithmCombo.setCurrentIndex(0)
+            self.alg_changed(0)
+        else:
+            self.algorithmCombo.setCurrentIndex(segalg_index)
+            self.seg_alg=self._algs[segalg_index][1]
+            self.segparamsEdit.setText(settings.value('segalg_params').toString())
+                
+        
+            
+            
     def save_state(self):
         settings=QSettings()  
         settings.setValue('nbins', QVariant(self.sizeEdit.text()))
-        settings.setValue('seg_size_min', QVariant(self.sizeMinEdit.text()))
         settings.setValue('threshold', QVariant(self.tresholdEdit.text()))
-        settings.setValue('silence', QVariant(self.silenceEdit.text()))
         settings.setValue('analyze', QVariant(self.analyzeCheckBox.isChecked()))
         settings.setValue('autoplay', QVariant(self.autoplayCheckBox.isChecked()))
         settings.setValue('dir', QVariant(self._dir))
         settings.setValue('startIndex', QVariant(self.startIndexEdit.text()))
         settings.setValue('endIndex', QVariant(self.endIndexEdit.text()))
+        settings.setValue('segalg',  QVariant(self.seg_alg.__name__ if self.seg_alg else ''))
+        settings.setValue('segalg_params', QVariant(self.segparamsEdit.text()))
+        settings.setValue('start', QVariant(self.startIndexEdit.text()))
+        settings.setValue('end', QVariant(self.endIndexEdit.text()))
+        
         
     def closeEvent(self, event):
         self.save_sample()
@@ -342,11 +399,7 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         self.save_sample()
         self._index=i-1
         self.load_sample()
-            
-    @property        
-    def seg_size_min(self):
-        return float(self.sizeMinEdit.text() or 0)  
-     
+                 
     @property        
     def nbins(self):
         return int(self.sizeEdit.text() or 0)
@@ -354,10 +407,6 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
     @property
     def threshold(self):
         return float(self.tresholdEdit.text() or 0) 
-    
-    @property
-    def silence(self):
-        return float(self.silenceEdit.text() or 0) 
     
     @property
     def start_index(self):
@@ -372,12 +421,49 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         if not t:
             return None
         return int(t)
+    
+    @property
+    def start_pos(self):
+        t=self.startEdit.text()
+        if not t:
+            return None
+        return float(t)
+    
+    @property
+    def end_pos(self):
+        t=self.endEdit.text()
+        if not t:
+            return None
+        return float(t)
+    
+    
+    def get_params(self):
+        try:
+            return text_to_params(self.segparamsEdit.text())
+        except ValueError, e:
+            QMessageBox.warning(self, 'Invalid parameters', 
+                                    str(e),
+                                    QMessageBox.Ok)
             
     def _load_audio(self, af):
-        a, sr=audiolib.load_audio_sample(os.path.join(self._dir, af))
+        params=self.get_params()
+        try:
+            a, sr=audiolib.load_audio_sample(os.path.join(self._dir, af))
+        except Exception,e:
+            QMessageBox.warning(self, 'Invalid audio', 
+                                    str(e),
+                                    QMessageBox.Ok)
+            return
+        
         seg_details=[]
-        samples=audiolib.segment_audio(a, sr, limit=self.threshold, step_sec=self.seg_size_min, 
-                                       silence_sec=self.silence ,seg_details=seg_details)
+        try:
+            samples=audiolib.segment_audio(self.seg_alg.__name__, a, sr, limit=self.threshold, seg_details=seg_details,
+                                       **params)
+        except Exception,e:
+            QMessageBox.warning(self, 'Segmentation error', 
+                                    str(e),
+                                    QMessageBox.Ok)
+            return
         with QWriteLocker(self.lock):
             self._full_audio=a
             self._seg_details=seg_details
@@ -402,7 +488,7 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         print 'Showing wave'   
         wDialog=WaveDialog(self, self.threshold);
         wDialog.show() 
-        wDialog.plot_wave(audiolib.calc_energy_env(self._full_audio, self._sr), self._seg_details)
+        wDialog.plot_wave(segmentation.calc_energy_env(self._full_audio, self._sr), self._seg_details)
         
         
     @pyqtSignature('')
@@ -439,7 +525,7 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
             return
         
         classes=cls_collector.classes
-        
+        params=self.get_params()
         def output_samples():
             pd=QProgressDialog('Saving samples ...', 'Abort', 0, len(self._items), self)
             #pd.setWindowModality(Qt.WindowModal)
@@ -448,8 +534,7 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
             for count, (audio_file, _p, txt_file) in enumerate(self._items):
                 if txt_file:
                     a,sr= audiolib.load_audio_sample(os.path.join(self._dir, audio_file))
-                    samples=audiolib.segment_audio(a, sr, limit=self.threshold, step_sec=self.seg_size_min, 
-                                       silence_sec=self.silence )
+                    samples=audiolib.segment_audio(self.seg_alg.__name__, a, sr, limit=self.threshold, **params )
                     segments=samples[self.start_index:self.end_index]
                     ts=open(os.path.join(self._dir, txt_file)).read()
                     for i,s in enumerate(segments):
@@ -467,10 +552,14 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
                 
             f.close()
             cfg=open(file_name+'.cfg', 'w')
-            cfg.write(repr({'classes':classes, 'seg_size_min':self.seg_size_min, 'nbins': self.nbins,
-                            'silence': self.silence, 'threshold':self.threshold,
+            cfg.write(repr({'classes':classes, 'nbins': self.nbins,
+                            'threshold':self.threshold,
                             'start_index':self.start_index, 'end_index':self.end_index,
+                            'start_pos':self.start_pos, 'end_pos':self.end_pos,
+                            'segalg': self.seg_alg.__name__,
+                            'params':params
                             }))
+            
             cfg.close()
             pd.setValue(len(self._items))
         QTimer.singleShot(100, output_samples)
@@ -520,7 +609,7 @@ class Player(QThread):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setOrganizationName("ivan")
-    app.setOrganizationDomain("ivan")
+    app.setOrganizationDomain("zderadicka.eu")
     app.setApplicationName(TITLE)
     dialog = MainDialog()
     dialog.show()

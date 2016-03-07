@@ -34,8 +34,8 @@ def classify_audio_file(audio_file,cfg, ext=None):
     r=load_scaling_range(cfg['range_file'])
     a,sr=audiolib.load_audio_sample(audio_file, ext)
     logger.debug('Loaded audio sample of length %.2f' % (len(a)/float(sr)))
-    segs=audiolib.segment_audio(a, sr, limit=cfg['threshold'], step_sec=cfg['seg_size_min'], 
-                silence_sec=cfg['silence']) [cfg['start_index']:cfg['end_index']]
+    segs=audiolib.segment_audio(cfg['segalg'],a, sr, limit=cfg['threshold'], 
+                                **cfg['params']) [cfg['start_index']:cfg['end_index']]
     
     scaled=[]
     for s in segs:

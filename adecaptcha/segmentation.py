@@ -1,6 +1,32 @@
 import numpy
 import logging
 logger=logging.getLogger()
+import inspect
+
+
+def _extract_params(f):
+        params=inspect.getargspec(f)
+        if len(params.args)-4>0:
+            return dict(zip(params.args[4:], params.defaults[2:]))
+
+def seg_alg(name):
+    def _wrap(fn):
+        def _inner(*args, **kwargs): 
+            return fn(*args, **kwargs)
+        _inner.alg_name=name
+        _inner.alg_default_params=_extract_params(fn)
+        _inner.__name__ = fn.__name__
+        return _inner
+    return _wrap
+
+def list_algs():
+    res=[]
+    for f in globals().values():
+        if inspect.isfunction(f) and hasattr(f, 'alg_name'):
+            res.append((f.alg_name, f))
+    return res
+        
+    
 
 def calc_energy_env(a, sr, win_size=0.01):
     wsize=win_size*sr
@@ -44,8 +70,18 @@ def cut_segments(a, sr, segments, size_sec=None, sound_canvas=None):
         
     return ary_segments
 
-def segment_audio(data_array, sr, step_sec=0.35, limit =500, 
-                  silence_sec=0.03, size_sec=None, seg_details=None, sound_canvas=0.5):
+def segment_audio(seg_alg,data_array, sr,  limit =5,  seg_details=None,**kwargs):
+    f=globals().get(seg_alg)
+    if not f:
+        raise ValueError('Invalid alg. name %s'%seg_alg)
+    return f(data_array, sr,  limit,  seg_details, **kwargs)
+
+#segmentation algorithms must have this signature:
+#def alg(data_array, sr, limit=123, seg_details=None, ... (params specific to algorithm follows as keyword params with default)
+
+@seg_alg('Simple Energy Envelope')
+def segment_audio_ee(data_array, sr,  limit =5,  seg_details=None,
+                  step_sec=0.35, silence_sec=0.03, sound_canvas=0.5):
     step=int(round(step_sec*sr))
     silence=silence_sec*sr
     if sound_canvas:
@@ -78,8 +114,9 @@ def segment_audio(data_array, sr, step_sec=0.35, limit =500,
     dbg_segments(segments, sr)
     return cut_segments(data_array, sr, segments, None, sound_canvas)
     
-    
-def segment_audio_oldest(data_array, sr, step_sec=0.01, limit=0.05, size_sec=None):
+@seg_alg('Old Very Naive')    
+def segment_audio_naive(data_array, sr, limit=0.05,  seg_details=None, 
+                         step_sec=0.01,  size_sec=None):
     
     step=int(step_sec*sr)
     steps=numpy.ceil(float(len(data_array))/step)

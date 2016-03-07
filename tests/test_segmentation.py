@@ -5,6 +5,7 @@ Created on Aug 9, 2014
 '''
 import unittest
 from adecaptcha import audiolib
+from adecaptcha import segmentation
 
 
 class Test(unittest.TestCase):
@@ -16,13 +17,21 @@ class Test(unittest.TestCase):
 
     def tearDown(self):
         pass
-
+    
+    def test_list(self):
+        l=segmentation.list_algs()
+        self.assertTrue(len(l)>=2)
+        ld=dict(l)
+        x=ld['Simple Energy Envelope'].alg_default_params
+        self.assertEqual(len(x), 3)
+        self.assertTrue(x['step_sec']) 
+        self.assertEqual(ld['Simple Energy Envelope'].__name__, 'segment_audio_ee')
 
     def test1(self):
         a,sr=audiolib.load_audio_sample('test1.wav')
         sd=[]
-        segs=audiolib.segment_audio(a, sr, step_sec=0.2, 
-            limit =5,silence_sec=0.1, size_sec=0.5, seg_details=sd)
+        segs=audiolib.segment_audio('segment_audio_ee',a, sr, limit =5,  seg_details=sd,
+            silence_sec=0.1, step_sec=0.2)
         print sd
         self.assertEqual(len(sd),4)
 

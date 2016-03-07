@@ -55,17 +55,21 @@ load them in one directory sound and picture must have same base name (xyz.wav a
 Start python samplestool.py (requires also pyqt4, pyao, matplotlib modules). 
 There set:
 - Directory with samples -   to your downloaded samples
-- Segment min.length (s) - minimum length of a letter sound - should be something like 0.2 - 0.3 or close
-- Silence min. length (s) - this is minimum length of silence between two letters - should be 
-something like 0.1 - depends
+- Segmentation algorithm - select one,
+	Simple Energy Envelope  - this one uses sum of squares of amplitude with small window, 
+	divided by window size, scaled to values 0-100 
+	Simple Very Naive - some old segmentation - basicaly looking for amplitude to step over 
+	threshold and then taking size_sec sample - or something like this  
+- Threshold for segmentation - threshold to distinguish some sound from silence - 
+  value is individual for each algorithm 
+  For Simple Energy Envelope   you can  click "Show Energy Envelope", 
+	this will show chart of energy envelope for current sample -  try few samples and you will 
+	get idea what right value should be (segments are also added small offset before 
+	and after they reach the threshold)
+- Segmentation params - specific for given algorithm - default values are shown
 - Number of freq. bins - number of frequency spectrum bins to which signal is divided - this set size
-of feature vector for each letter sound
-- Threshold for segmentation - threshold to distinguish some sound from silence - value is 
- mean energy envelope  (basically sum of squares of amplitude with small window, 
-divided by window size, scaled to values 0-100).  This would be very individual for samples -  you can 
-click "Show Energy Envelope" - this will show chart of energy envelope for current sample -  try 
-few samples and you will get idea what right value should be (segments are also added small offset before 
-and after they reach the threshold)
+ of feature vector for each letter sound
+
 - Check "Play sound when move to next item" - it'll help to work with samples
 
 Then click Next  button and it opens first sample, go through several samples to set segmentation data 

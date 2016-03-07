@@ -21,14 +21,15 @@ logger=logging.getLogger()
 
 class AbortedByUser(Exception):
     pass
-def analyze_segments(mp3_files, dir='', progress_callback=None, step_sec=0.3, limit=500, 
-                     silence_sec=0.03, start_index=None, end_index=None):
+def analyze_segments(mp3_files, dir='', progress_callback=None, 
+                     seg_alg=None, limit=5, params=None,
+                    start_index=None, end_index=None):
     seg_length=[]
     seg_no=[]
     for i,mp3_file in enumerate(mp3_files):  
         f=os.path.join(dir, mp3_file)
         a, sr= load_audio_sample(f)
-        segments=segment_audio(a, sr, step_sec, limit, silence_sec )
+        segments=segment_audio(seg_alg, a, sr, limit, **params )
         seg_no.append(len(segments))
         seg_length.extend([float(len(s))/float(sr) for s in segments[start_index: end_index]])
         if progress_callback:
