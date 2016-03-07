@@ -16,6 +16,9 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="3" column="1">
+      <widget class="QComboBox" name="algorithmCombo"/>
+     </item>
      <item row="2" column="1">
       <widget class="QTextEdit" name="segstatEdit">
        <property name="readOnly">
@@ -23,14 +26,24 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="9" column="0">
       <widget class="QLabel" name="label_11">
        <property name="text">
         <string>Use this subset of segments</string>
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>&amp;Directory with samples</string>
+       </property>
+       <property name="buddy">
+        <cstring>directoryEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
         <widget class="QLabel" name="label_12">
@@ -105,15 +118,18 @@
        </item>
       </layout>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>&amp;Directory with samples</string>
+     <item row="16" column="0" colspan="2">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
-       <property name="buddy">
-        <cstring>directoryEdit</cstring>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
        </property>
-      </widget>
+      </spacer>
      </item>
      <item row="0" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -151,34 +167,21 @@
        </item>
       </layout>
      </item>
-     <item row="9" column="0">
+     <item row="10" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Current file</string>
        </property>
       </widget>
      </item>
-     <item row="9" column="1">
+     <item row="10" column="1">
       <widget class="QLineEdit" name="currentEdit">
        <property name="enabled">
         <bool>false</bool>
        </property>
       </widget>
      </item>
-     <item row="15" column="0" colspan="2">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="10" column="0">
+     <item row="11" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
         <string>&amp;Transcibe letters</string>
@@ -188,10 +191,10 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="1">
+     <item row="11" column="1">
       <widget class="QLineEdit" name="transcribeEdit"/>
      </item>
-     <item row="14" column="1">
+     <item row="15" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QPushButton" name="playButton">
@@ -238,34 +241,17 @@
        </item>
       </layout>
      </item>
-     <item row="11" column="1">
+     <item row="12" column="1">
       <widget class="QLabel" name="imageLabel">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
-     <item row="11" column="0">
+     <item row="12" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>CAPTCHA image</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="sizeMinEdit">
-       <property name="text">
-        <string>0.35</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Treshold for &amp;segmentation</string>
-       </property>
-       <property name="buddy">
-        <cstring>tresholdEdit</cstring>
        </property>
       </widget>
      </item>
@@ -283,24 +269,24 @@
        </property>
       </widget>
      </item>
-     <item row="12" column="0" colspan="2">
+     <item row="13" column="0" colspan="2">
       <widget class="QCheckBox" name="autoplayCheckBox">
        <property name="text">
         <string>Play sound when move to next item</string>
        </property>
       </widget>
      </item>
-     <item row="13" column="0">
+     <item row="14" column="0">
       <widget class="QLabel" name="label_8">
        <property name="text">
         <string>Sample number</string>
        </property>
       </widget>
      </item>
-     <item row="13" column="1">
+     <item row="14" column="1">
       <widget class="QSpinBox" name="numberSpinBox"/>
      </item>
-     <item row="14" column="0">
+     <item row="15" column="0">
       <widget class="QLabel" name="label_9">
        <property name="text">
         <string>Current Sample:</string>
@@ -310,24 +296,17 @@
      <item row="5" column="0">
       <widget class="QLabel" name="label_10">
        <property name="text">
-        <string>Sil&amp;ence min length(s)</string>
+        <string>Segmentation params</string>
        </property>
        <property name="buddy">
-        <cstring>silenceEdit</cstring>
+        <cstring>segparamsEdit</cstring>
        </property>
       </widget>
      </item>
      <item row="5" column="1">
-      <widget class="QLineEdit" name="silenceEdit">
+      <widget class="QLineEdit" name="segparamsEdit">
        <property name="text">
         <string>0.03</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QLineEdit" name="tresholdEdit">
-       <property name="text">
-        <string>470</string>
        </property>
       </widget>
      </item>
@@ -351,10 +330,88 @@
      <item row="3" column="0">
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Segment min &amp;length (s)</string>
+        <string>Segmentation algorithm</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_15">
+       <property name="text">
+        <string>Start and End</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item alignment="Qt::AlignLeft">
+        <widget class="QLabel" name="label_16">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Start position</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="startEdit">
+         <property name="maximumSize">
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>End position</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="endEdit">
+         <property name="maximumSize">
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Treshold for &amp;segmentation</string>
        </property>
        <property name="buddy">
-        <cstring>sizeMinEdit</cstring>
+        <cstring>tresholdEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="tresholdEdit">
+       <property name="text">
+        <string>470</string>
        </property>
       </widget>
      </item>
