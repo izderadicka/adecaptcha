@@ -14,8 +14,8 @@ def fbins(sr, nbins=40):
 
 def posbins(sr,slen, nbins=40):
     step=2.0*slen/sr
-    p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.int))
-    return p
+    p=np.around(fbins(sr,nbins)*step, out=np.zeros(nbins,dtype=np.double))
+    return p.astype(np.int)
 
 def winspos(sr,slen, nbins=40):
     p=posbins(sr,slen,nbins)
