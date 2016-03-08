@@ -34,6 +34,19 @@ class Test(unittest.TestCase):
             silence_sec=0.1, step_sec=0.2)
         print sd
         self.assertEqual(len(sd),4)
+        
+    def test_fixed(self):
+        a,sr=audiolib.load_audio_sample('test1.wav')
+        sd=[]
+        segs=audiolib.segment_audio('segment_audio_fixed4',a, sr, limit =5,  seg_details=sd,
+            start_1=0.0,end_1=0.1,
+            start_2=0.2, end_2=0.3,
+            start_3=0.4, end_3=0.5,
+            start_4= 0.6, end_4=0.7)
+        print sd
+        self.assertEqual(len(sd),4)
+        self.assertEqual(len(segs),4)
+        
 
 
 

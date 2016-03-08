@@ -2,12 +2,13 @@ import numpy
 import logging
 logger=logging.getLogger()
 import inspect
+from collections import OrderedDict
 
 
 def _extract_params(f):
         params=inspect.getargspec(f)
         if len(params.args)-4>0:
-            return dict(zip(params.args[4:], params.defaults[2:]))
+            return OrderedDict(zip(params.args[4:], params.defaults[2:]))
 
 def seg_alg(name):
     def _wrap(fn):
@@ -119,7 +120,17 @@ def segment_audio_ee(data_array, sr,  limit =5,  seg_details=None,
     segments=numpy.array(segments, dtype=numpy.int)
     
     return cut_segments(data_array, sr, segments, None, sound_canvas, seg_details)
+
+@seg_alg('4 Fixed segments')
+def segment_audio_fixed4(data_array, sr, limit=0.0,  seg_details=None, 
+                        start_1=0.0,end_1=0.1,
+                        start_2=0.2, end_2=0.3,
+                        start_3=0.4, end_3=0.5,
+                        start_4= 0.6, end_4=0.7):   
     
+    segments=numpy.array([[start_1, end_1], [start_2, end_2], [start_3, end_3], [start_4,end_4]],dtype=numpy.double) * sr
+    return cut_segments(data_array, sr, segments.astype(numpy.int), None, None, seg_details)
+ 
 @seg_alg('Old Very Naive')    
 def segment_audio_naive(data_array, sr, limit=0.05,  seg_details=None, 
                          step_sec=0.01,  size_sec=None):
