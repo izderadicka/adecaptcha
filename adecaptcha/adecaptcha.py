@@ -7,7 +7,10 @@ Created on Apr 20, 2010
 
 
 import sys,os, os.path, urllib, urllib2, optparse, traceback
-import clslib
+try:
+    from adecaptcha import clslib
+except ImportError:
+    import clslib
 
 p=optparse.OptionParser(usage="%s [options] config_file mp3_url" % sys.argv[0])
 def def_options():

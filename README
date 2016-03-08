@@ -106,20 +106,20 @@ See result - specially check of classification accuracy, in ideal case you shoul
 Accuracy = 100% (200/200) (classification)
 
 after this we have all we need, just copy
-cp xxx.data.cfg ../../xxx.cfg
+cp xxx.cfg ../../xxx.cfg
 cp xxx.train.range ../../xxx.range
 cp xxx.train.model ../../xxx.model
 
 cd ../..
 
-edit here xxx.cfg - add there keys to point to model and range files:
+check that  xxx.cfg - contains keys for model and range files:
 { ... 
-#add to end
+
 , 'range_file':'xxx.range', 'model_file':'xxx.model' 
 }
 
 
-and can test if it works:
+and test if it works:
 ./adechaptcha.py xxx.conf "http://some_server/audio_captcha.wav"
  
 -----------------------------------------------------------------------
