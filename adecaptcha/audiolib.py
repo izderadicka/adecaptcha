@@ -40,11 +40,14 @@ def analyze_segments(mp3_files, dir='', progress_callback=None,
     seg_length=numpy.array(seg_length, dtype=numpy.float)
     seg_no=numpy.array(seg_no, dtype=numpy.int)
     
-    return "Segments number per sample: min=%d, max=%d, mean=%.4f std=%.4f var=%.4f\n" % \
-        (seg_no.min(), seg_no.max(), seg_no.mean(), seg_no.std(), seg_no.var()) + \
-        "Segments lengths(sec): min=%.4f, max=%.4f, mean=%.4f std=%.4f var=%.4f\n" % \
+    res= "Segments number per sample: min=%d, max=%d, mean=%.4f std=%.4f var=%.4f\n" % \
+        (seg_no.min(), seg_no.max(), seg_no.mean(), seg_no.std(), seg_no.var())
+    if len(seg_length):
+        res+="Segments lengths(sec): min=%.4f, max=%.4f, mean=%.4f std=%.4f var=%.4f\n" % \
         (seg_length.min(), seg_length.max(), seg_length.mean(), seg_length.std(), seg_length.var())
-
+    
+    return res
+    
 def signal_envelope(data_array):
     return numpy.abs(data_array)  
 

@@ -11,9 +11,11 @@ import sampletool_dialog
 import sys, os, os.path, audiolib, segmentation, time, clslib
 
 import pylab
+import numpy
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
+import traceback
 
 TITLE = 'Prepare training samples'
 AUDIO_EXTS=('.mp3', '.wav',)
@@ -35,12 +37,13 @@ class WaveDialog(QDialog):
         self.setLayout(vbox)
         
     
-    def plot_wave(self, arr, seg_details=[]):
-        self.axes.plot(arr, color="blue")
+    def plot_wave(self, arr, sr, seg_details=[]):
+        x=numpy.arange(len(arr), dtype=numpy.double) / sr
+        self.axes.plot(x, arr, color="blue")
         self.axes.axhline(self.threshold, color='green')
         for s,e in seg_details:
-            self.axes.axvline(s, color='red')
-            self.axes.axvline(e, color='yellow')
+            self.axes.axvline(s/float(sr), color='red')
+            self.axes.axvline(e/float(sr), color='yellow')
         self.canvas.draw()
         
 class WorkerThread(QThread):
@@ -63,6 +66,7 @@ class WorkerThread(QThread):
         except Exception, e:
             self.error.emit(str(e))
             print "Error in worker thread %s" %e
+            traceback.print_exc()
         with QMutexLocker(self.mutex):
             if not self.canceled:
                 self.done.emit(res)
@@ -153,14 +157,15 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
     def alg_changed(self, idx):
         print 'Algorithm changed to %s' % self._algs[idx][0]
         self.seg_alg=self._algs[idx][1]
-        self.segparamsEdit.setText(params_to_text(self._algs[idx][1].alg_default_params))
+        self.segparamsEdit.setText(params_to_text(self.seg_alg.alg_default_params))
+        self.tresholdEdit.setText(str(self.seg_alg.alg_default_threshold))
         
     def analyze_samples(self):
         self.analyze_dialog=QProgressDialog('Analyzing samples ...', 'Abort', 0, len(self._items), parent=self)
         #self.analyze_dialog.setWindowModality(Qt.WindowModal)
         self.analyze_dialog.show()
         
-        self.analyze_thread=AnalyzeThread([i[0] for i in self._items], self._dir, self.seg_size_min, self.threshold, self.silence)
+        self.analyze_thread=AnalyzeThread([i[0] for i in self._items], self._dir, self)
         self.analyze_thread.updated.connect(self.analyze_samples_update)
         self.analyze_thread.done.connect(self.analyze_samples_done)
         self.analyze_thread.error.connect(self.analyze_samples_done)
@@ -398,6 +403,7 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
             return
         self.save_sample()
         self._index=i-1
+        self.nextButton.setEnabled(True)
         self.load_sample()
                  
     @property        
@@ -488,7 +494,7 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         print 'Showing wave'   
         wDialog=WaveDialog(self, self.threshold);
         wDialog.show() 
-        wDialog.plot_wave(segmentation.calc_energy_env(self._full_audio, self._sr), self._seg_details)
+        wDialog.plot_wave(segmentation.calc_energy_env(self._full_audio, self._sr), self._sr, self._seg_details)
         
         
     @pyqtSignature('')
@@ -520,10 +526,11 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         #debug
         for c in cls_collector.classes: print '%s(%d),'%(c, cls_collector.class_count(c)), 
         print
-        file_name=QFileDialog.getSaveFileName(self, 'File to save samples mfcc representation')
+        file_name=unicode(QFileDialog.getSaveFileName(self, 'File to save samples mfcc representation'), 'UTF-8')
         if not file_name:
             return
-        
+        base_name=os.path.splitext(file_name)[0]
+        short_name=os.path.split(base_name)[-1]
         classes=cls_collector.classes
         params=self.get_params()
         def output_samples():
@@ -551,13 +558,15 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
                     break
                 
             f.close()
-            cfg=open(file_name+'.cfg', 'w')
+            cfg=open(base_name+'.cfg', 'w')
             cfg.write(repr({'classes':classes, 'nbins': self.nbins,
                             'threshold':self.threshold,
                             'start_index':self.start_index, 'end_index':self.end_index,
                             'start_pos':self.start_pos, 'end_pos':self.end_pos,
                             'segalg': self.seg_alg.__name__,
-                            'params':params
+                            'params':params,
+                            'range_file': short_name+'.range',
+                            'model_file': short_name+'.model'
                             }))
             
             cfg.close()

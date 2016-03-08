@@ -15,6 +15,7 @@ def seg_alg(name):
             return fn(*args, **kwargs)
         _inner.alg_name=name
         _inner.alg_default_params=_extract_params(fn)
+        _inner.alg_default_threshold = inspect.getargspec(fn).defaults[0]
         _inner.__name__ = fn.__name__
         return _inner
     return _wrap
@@ -42,7 +43,10 @@ def dbg_segments(segments, sr):
     diff=(segments[:, 1] - segments[:,0]) / sr
     logger.debug('Found %d segments: %s (lenghts %s)' % (len(segments), str(segments/sr), str(diff) ))
     
-def cut_segments(a, sr, segments, size_sec=None, sound_canvas=None):
+def cut_segments(a, sr, segments, size_sec=None, sound_canvas=None, seg_details=None):
+    if seg_details is not None and hasattr(seg_details, 'extend'):
+        seg_details.extend(segments)
+    dbg_segments(segments, sr)
     
     ary_segments=[]
     if sound_canvas: 
@@ -76,23 +80,27 @@ def segment_audio(seg_alg,data_array, sr,  limit =5,  seg_details=None,**kwargs)
         raise ValueError('Invalid alg. name %s'%seg_alg)
     return f(data_array, sr,  limit,  seg_details, **kwargs)
 
+
+
+
 #segmentation algorithms must have this signature:
 #def alg(data_array, sr, limit=123, seg_details=None, ... (params specific to algorithm follows as keyword params with default)
 
 @seg_alg('Simple Energy Envelope')
 def segment_audio_ee(data_array, sr,  limit =5,  seg_details=None,
-                  step_sec=0.35, silence_sec=0.03, sound_canvas=0.5):
+                  step_sec=0.2, silence_sec=0.1, sound_canvas=0.5):
     step=int(round(step_sec*sr))
     silence=silence_sec*sr
     if sound_canvas:
         sound_canvas=int(round(silence*sound_canvas))
     env=calc_energy_env(data_array,sr)  
+    env_len=len(env)
     i=0 
     in_segment=False
     seg_start=0
     segments=[]
     silence_detected=0
-    while i<len(env) :
+    while i<env_len :
         if env[i]>limit:
             silence_detected=0
         if env[i]<=limit and in_segment:
@@ -109,10 +117,8 @@ def segment_audio_ee(data_array, sr,  limit =5,  seg_details=None,
     if in_segment:
         segments.append([seg_start, len(env)-1])
     segments=numpy.array(segments, dtype=numpy.int)
-    if seg_details is not None and hasattr(seg_details, 'extend'):
-        seg_details.extend(segments)
-    dbg_segments(segments, sr)
-    return cut_segments(data_array, sr, segments, None, sound_canvas)
+    
+    return cut_segments(data_array, sr, segments, None, sound_canvas, seg_details)
     
 @seg_alg('Old Very Naive')    
 def segment_audio_naive(data_array, sr, limit=0.05,  seg_details=None, 
@@ -155,7 +161,5 @@ def segment_audio_naive(data_array, sr, limit=0.05,  seg_details=None,
         segments.append([start_index, i+1])
         
     segments=numpy.array(segments, dtype=numpy.int)*step
-    
-    
-    dbg_segments(segments, sr)
-    return cut_segments(a, sr, segments, size_sec)
+   
+    return cut_segments(a, sr, segments, size_sec, seg_details=seg_details)
