@@ -6,15 +6,19 @@ Created on Apr 20, 2010
 '''
 
 
-import sys,os, os.path, urllib, urllib2, optparse, traceback
+import sys, urllib2, argparse, urlparse, os.path
 try:
     from adecaptcha import clslib
 except ImportError:
     import clslib
 
-p=optparse.OptionParser(usage="%s [options] config_file mp3_url" % sys.argv[0])
 def def_options():
-    pass
+    p=argparse.ArgumentParser()
+    p.add_argument('config_file', help='Configuration file')
+    p.add_argument('sound_url', nargs='?', help='URL of sound file - wav or mp3, if not present reads file from stdin')
+    p.add_argument('-t', '--sound-type', choices=['wav', 'mp3'], help='Type of sound file - if cannot be determined from URL')
+    p.add_argument('-o', '--output-file', help='Writes result to file (instead of stdout)')
+    return p.parse_args() 
     
 def get_ext(res):
     mime=res['Content-Type']
@@ -27,30 +31,32 @@ def get_ext(res):
     
 def main():
     def_options()
-    options, args=p.parse_args() 
-    if len(args)<2:
-        p.print_usage()
-        sys.exit(1)
-    must_close=False
-    if len(args)>2:
-        f=open(args[2], 'w')
-        must_close=True
+    opts= def_options()
+    
+    if opts.output_file:
+        f=open(opts.output_file, 'w')
     else:
         f=sys.stdout
+    if opts.sound_url:
+        url= urlparse.urlparse(opts.sound_url)
+        if url[0]:
+            resp=urllib2.urlopen(opts.sound_url)
+        else:
+            resp=open(opts.sound_url, 'rb')
+    else:
+        resp=sys.stdin
         
-    try:    
-        resp=urllib2.urlopen(args[1])
-        
-        res=clslib.classify_audio_file(resp, args[0], ext=get_ext(resp.info()))
-        
-    except:
-        traceback.print_exc()
-        sys.exit(2)
+    ext='.' + opts.sound_type if opts.sound_type else None or \
+        get_ext(resp.info()) if hasattr(resp, 'info') else None or \
+        os.path.splitext(opts.sound_url)[1]
+    if not ext or ext not in ['.wav', '.mp3']:
+        print >>sys.stderr, 'Cannot determine sound file type, specify with -t argument'
+        sys.exit(1)
+    res=clslib.classify_audio_file(resp, opts.config_file, ext=ext)
     clslib.release_models()
     f.write(res+'\n')
-    if must_close:
-        f.close()
-    
+    f.close()
+    resp.close()
     
 if __name__=='__main__':
     main()

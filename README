@@ -17,7 +17,7 @@ git clone https://github.com/izderadicka/adecaptcha.git
 
 cd adecaptcha/
 
-sudo apt-get install build-essential python-dev python-numpy python-scipy python-pymad python-pip
+sudo apt-get install build-essential python-dev python-numpy python-scipy python-pymad python-pyao python-pip
 sudo pip install cython
 
 #build cython extensions
@@ -45,8 +45,34 @@ sudo mv  adecaptcha/ /usr/local/lib/python2.7/dist-packages/
  cp -av pyload/userplugins/   ~/.pyload/
 
 # and restart pyLoadCore
--------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+pymad and pyao manual install
+-------------------------------------------------------------------------------
+alternatively numpy,scipy and cython could be installed via pip
+however pyao and pymad should be installed from source:
+
+sudo apt-get install libmad0-dev
+git clone --depth 1 https://github.com/jaqx0r/pymad
+cd pymad/
+python config_unix.py 
+python setup.py install
+
+cd ..
+
+wget -O - http://ekyo.nerim.net/software/pyogg/pyao-0.82.tar.gz | tar xzv
+sudo apt-get install libao-dev
+wget -O - https://launchpad.net/ubuntu/+archive/primary/+files/pyao_0.82-5build1.debian.tar.gz| tar xzv
+patch -p0 -i debian/patches/driver_id.patch
+patch -p0 -i debian/patches/int_format_strings.patch 
+patch -p0 -i debian/patches/python25.patch 
+cd pyao-0.82/
+python config_unix.py
+python setup.py install
+
+cd ..
+rm -r pyao-0.82 debian/ pymad
+-------------------------------------------------------------------------------
 Advanced - how to train for new audio samples
 -------------------------------------------------------------------------------
 Download enough samples ~500 should be enough (if sample contains 4 letters),
