@@ -42,10 +42,13 @@ def twin(start, stop):
 
 def pwrspec(sig,sr,nbins=40):
     s=np.fft.rfft(sig)
-    wins=winspos(sr, len(s),nbins)
+    samples=len(s)
+    wins=winspos(sr, samples, nbins)
     coefs=[]
     for i in xrange(nbins):
         start,stop = wins[i]
+        if stop>samples:
+            stop=samples
         pwr=np.square(s[start:stop].real)+np.square(s[start:stop].imag)
         coefs.append(np.dot(pwr, twin(start,stop)))
         
