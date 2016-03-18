@@ -69,6 +69,17 @@ def load_audio_sample(fname, ext=None):
         return load_wav_sample(fname)
     else:
         raise ValueError('Unknown audio type')
+
+# Fast but not working for all wavs    
+# def load_wav_sample(fname):
+#     sr, data=scipy.io.wavfile.read(fname)
+#     if data.ndim>1:
+#         _, channels=data.shape
+#         if channels>2:
+#             raise ValueError('Only 1 or 2 channels are supported')
+#         return (data[:,0]+data[:,1]) /2, sr
+#     else:
+#         return data,sr
     
 def load_wav_sample(fname):
     f=wave.open(fname)
@@ -90,21 +101,25 @@ def load_wav_sample(fname):
         else:
             raise ValueError('Only 1 or2 bytes sample size is supported')
         count=flen/nchan
-        sample=[]
+        data=numpy.empty((count,), dtype=numpy.int16)
+        frames=f.readframes(count)
+        step=slen*nchan
+        offset=0
         for pos in xrange(count):
             if nchan==1:
-                s=f.readframes(1)
+                s=frames[offset:offset+slen]
                 if not s:
-                    raise ValueError('File %s ends early, at pos. %d'%(fname,pos))
-                sample.append(sample_to_int(s))
+                    raise ValueError('Files ends early, at pos. %d'%pos)
+                data[pos]=sample_to_int(s)
             elif nchan==2:
-                l=f.readframes(1)
-                r=f.readframes(1)
+                l=frames[offset:offset+slen]
+                r=frames[offset+slen:offset+2*slen]
                 if not l or not r:
                     raise ValueError('Files ends early, at pos. %d'%pos)
                 val = (sample_to_int(l)+sample_to_int(r))/2
-                sample.append(val)
-        return numpy.array(sample, dtype=numpy.int16), sr
+                data[pos]=val
+            offset+=step
+        return data, sr
     finally:
         f.close()
         
