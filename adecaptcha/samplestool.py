@@ -442,6 +442,10 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
             return None
         return float(t)
     
+    @property
+    def play_whole(self):
+        return self.playWholeRadio.isChecked()
+    
     
     def get_params(self):
         try:
@@ -486,7 +490,10 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
                 
     def play_audio(self):
         self.playButton.setEnabled(False)
-        self.player.initialize(self._audio_samples, self._sr)
+        if self.play_whole:
+            self.player.initialize([self._full_audio], self._sr)
+        else:
+            self.player.initialize(self._audio_samples, self._sr)
         self.player.start()
         
     @pyqtSignature('')            
