@@ -33,7 +33,7 @@ def list_algs():
 def calc_energy_env(a, sr, win_size=0.01):
     wsize=win_size*sr
     a=numpy.array(a, dtype=numpy.int32)
-    win= numpy.ones(wsize, dtype=numpy.float) / float(wsize) / 10737418.24 
+    win= numpy.ones(int(wsize), dtype=numpy.float) / float(wsize) / 10737418.24 
     e= numpy.convolve(a * a, win, 'same')
     return e
 
