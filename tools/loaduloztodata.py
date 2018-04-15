@@ -28,8 +28,8 @@ while count:
         sound_ext=os.path.splitext(sound_file)[1]
         image_name=os.path.join(dir,h+image_ext)
         sound_name=os.path.join(dir, h+sound_ext)
-        urllib.urlretrieve(obj['image'], image_name)
-        urllib.urlretrieve(obj['sound'], sound_name)
+        urllib.urlretrieve("http:"+obj['image'], image_name)
+        urllib.urlretrieve("http:"+obj['sound'], sound_name)
     except Exception,e:
         print >>sys.stderr, "Error when downloading hash %s - %s" % (h, str(e))
         try:

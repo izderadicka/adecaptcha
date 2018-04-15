@@ -13,7 +13,7 @@ import sys, os, os.path, audiolib, segmentation, time, clslib
 import pylab
 import numpy
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import traceback
 
@@ -201,6 +201,7 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         self.tresholdEdit.setText(settings.value('threshold').toString() or '5')
         self.analyzeCheckBox.setChecked(settings.value('analyze').toBool() or False)
         self.autoplayCheckBox.setChecked(settings.value('autoplay').toBool()  or False)
+        self.playWholeRadio.setChecked(settings.value('play_whole').toBool() or False)
         self.startIndexEdit.setText(settings.value('startIndex').toString() or '')
         self.endIndexEdit.setText(settings.value('endIndex').toString() or '')
         self.startEdit.setText(settings.value('start').toString() or '')
@@ -234,6 +235,7 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         settings.setValue('threshold', QVariant(self.tresholdEdit.text()))
         settings.setValue('analyze', QVariant(self.analyzeCheckBox.isChecked()))
         settings.setValue('autoplay', QVariant(self.autoplayCheckBox.isChecked()))
+        settings.setValue('play_whole', QVariant(self.playWholeRadio.isChecked()))
         settings.setValue('dir', QVariant(self._dir))
         settings.setValue('startIndex', QVariant(self.startIndexEdit.text()))
         settings.setValue('endIndex', QVariant(self.endIndexEdit.text()))

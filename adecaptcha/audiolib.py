@@ -55,7 +55,7 @@ def signal_envelope(data_array):
 def play_array(a, sr):
     data=a.tostring()
     dev = ao.AudioDevice(0, bits=16, channels=1, rate=sr )
-    #print dev.driver_info()
+    print dev.driver_info(), sr
     dev.play(data)
     
 def load_audio_sample(fname, ext=None):
@@ -123,7 +123,7 @@ def load_wav_sample(fname):
     finally:
         f.close()
         
-def load_mp3_sample(fname):
+def load_mp3_sample(fname, always_two_channels=True): #looks like latest pymad is always returning two channels ? this is quick fix
     mf=mad.MadFile(fname)
     name=fname if isinstance(fname, types.StringTypes) else '<stream>'  
     logger.debug('loading mp3 file %s : rate %d, layer %d, mode %d, total time %d' %
@@ -141,10 +141,11 @@ def load_mp3_sample(fname):
     
     #a=numpy.fromstring(str(sample)[3:], dtype=numpy.int16)
     logger.debug('Lodaded %d words' % len(a))
-    if mf.mode() in (3,2):
+    if mf.mode() in (3,2) or always_two_channels:
         a.shape=-1,2
         a=numpy.mean(a,1)
-        a=numpy.around(a, out=numpy.zeros(a.shape, numpy.int16 ))
+        a=numpy.around(a)
+        a= a.astype(numpy.int16, casting="unsafe")
         
     return a, mf.samplerate()
 
