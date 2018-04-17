@@ -39,6 +39,7 @@ class WaveDialog(QDialog):
     
     def plot_wave(self, arr, sr, seg_details=[]):
         x=numpy.arange(len(arr), dtype=numpy.double) / sr
+        self.axes.clear()
         self.axes.plot(x, arr, color="blue")
         self.axes.axhline(self.threshold, color='green')
         for s,e in seg_details:
@@ -149,6 +150,8 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         self.analyze_thread=None
         self.analyze_dialog=None
         self._total_segments=0
+        
+        self.wave_dialog = None
         
     
         
@@ -360,6 +363,8 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         self.numberSpinBox.setValue(self._index+1)
         if self.autoplayCheckBox.isChecked():
             QTimer.singleShot(100,self.play_audio)
+        if self.wave_dialog and self.wave_dialog.isVisible():
+            self.wave_dialog.plot_wave(segmentation.calc_energy_env(self._full_audio, self._sr, self.win_size), self._sr, self._seg_details)
             
     def load_sample(self):
         
@@ -500,10 +505,13 @@ class MainDialog(QDialog, sampletool_dialog.Ui_Dialog):
         
     @pyqtSignature('')            
     def on_waveButton_clicked(self):
-        print 'Showing wave'   
-        wDialog=WaveDialog(self, self.threshold);
-        wDialog.show() 
-        wDialog.plot_wave(segmentation.calc_energy_env(self._full_audio, self._sr), self._sr, self._seg_details)
+        params = self.get_params()
+        self.win_size = params.get("win_size", 0.01)
+        print 'Showing energy envelope with window size %f' % self.win_size   
+        if (not self.wave_dialog):
+            self.wave_dialog=WaveDialog(self, self.threshold);
+        self.wave_dialog.show() 
+        self.wave_dialog.plot_wave(segmentation.calc_energy_env(self._full_audio, self._sr, self.win_size), self._sr, self._seg_details)
         
         
     @pyqtSignature('')

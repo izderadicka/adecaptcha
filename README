@@ -1,7 +1,6 @@
 This project is focused on decoding of audio captchas, which often might be much easier 
 then breaking visual captchas.
-It was tested on uloz.to audio captchas (as of August 2014) - also included are modified plugins for pyload 
-- so no need to manually enter captchas for uloz.to site.
+It was tested on uloz.to audio captchas (as of April 2018) 
 
 Code is hosted on https://github.com/izderadicka/adecaptcha
 
@@ -17,6 +16,7 @@ git clone https://github.com/izderadicka/adecaptcha.git
 
 cd adecaptcha/
 
+#concerning pymad I tested with manually build library - see below
 sudo apt-get install build-essential python-dev python-numpy python-scipy python-pymad python-pyao python-pip
 sudo pip install cython
 
@@ -41,10 +41,8 @@ cd ..
 #moving to system python path
 sudo mv  adecaptcha/ /usr/local/lib/python2.7/dist-packages/
 
-#If you want to use with pyload copy plugins to your local plugin dir
- cp -av pyload/userplugins/   ~/.pyload/
-
-# and restart pyLoadCore
+#If you want to use with pyload just install on same machine and assure that ulozto hoster is set 
+# to Sound captcha and restart pyLoadCore
 
 -------------------------------------------------------------------------------
 pymad and pyao manual install
@@ -82,19 +80,22 @@ Start python samplestool.py (requires also pyqt4, pyao, matplotlib modules).
 There set:
 - Directory with samples -   to your downloaded samples
 - Segmentation algorithm - select one,
-	Simple Energy Envelope  - this one uses sum of squares of amplitude with small window, 
+	Simple Energy Envelope  - this one uses sum of squares of amplitude within small window, 
 	divided by window size, scaled to values 0-100 
 	Simple Very Naive - some old segmentation - basicaly looking for amplitude to step over 
-	threshold and then taking size_sec sample - or something like this  
-- Threshold for segmentation - threshold to distinguish some sound from silence - 
+	threshold and then taking size_sec sample - or something like this  - actually not very useful
+	Fixed position - just cutoff fixed positions from sound signal
+	Or you can create relativelly easily your own segmentation - just look into segmentation.py for 
+	samples 
+- Threshold for segmentation - threshold to distinguish some sound from silence/background noise - 
   value is individual for each algorithm 
   For Simple Energy Envelope   you can  click "Show Energy Envelope", 
 	this will show chart of energy envelope for current sample -  try few samples and you will 
-	get idea what right value should be (segments are also added small offset before 
+	get idea what right value should be (segments have also added a small offset before 
 	and after they reach the threshold)
 - Segmentation params - specific for given algorithm - default values are shown
-- Number of freq. bins - number of frequency spectrum bins to which signal is divided - this set size
- of feature vector for each letter sound
+- Number of freq. bins - number of frequency spectrum bins to which signal is divided - this determines 
+  size of feature vector for each letter sound
 
 - Check "Play sound when move to next item" - it'll help to work with samples
 
@@ -102,34 +103,38 @@ Then click Next  button and it opens first sample, go through several samples to
 correctly.
 
 When you think segmentation is set properly, check "Analyze segmentation initially" - it then 
-calculates number of segments for all samples - ideally all samples should have same number of samples.
+calculates number of segments for all samples and prints some stats - ideally all samples should have 
+same number of segments.
 
 If there is some initial/final sound, that is not part of captcha text, you can set what segments should 
 be considered as a part of captcha  (supports python indexing - so end = -4 means last 4 segments)
 
 Now you need to transcribe all samples - write letters corresponding for current captcha and click next. 
-It's bit dull job but should not take less then hour for 500 samples.
+It's bit dull job but should not take much more then an hour for 500 samples.
 
 If all samples are transcribed  you can generate training data for SVM classificator and save 
 segmentation configuration. Click "Generate Training Data" button.  After clicking file 
 dialog is opened - save data within 'libsm-3.17/tools' directory say as 'xxx.data'. Progress dialog appears 
-so wait while  process ends.
+so wait until the process ends.
 
-Before creating  model for your data assure that you have packages gnuplot and gnuplot-x11 installed 
+Before creating  model from your data assure that you have packages gnuplot and gnuplot-x11 installed 
 (they are used by training tools).
   
 First we need to split data to training and test sets (test set will be used to measure 
-classificator accuracy) - for test data we can dedicate about 10% of all data set, that's 200 in this case. 
+classificator accuracy) - for test data we can dedicate about 10% of all data set, that's 200 (500 * 4 * 0.1)
+in this case. 
 
 cd libsm-3.17/tools
- ./subset.py xxx.data 200 xxx.test xxx.train
+ ./subset.py -s 1 xxx.data 200 xxx.test xxx.train
  
- now we can do training of the SVM classifier with our data:
-./easy.py ulozto.train ulozto.test
+ now we can do the training of the SVM classifier with our data:
+./easy.py xxx.train xxx.test
 
-this can take quite some time - half hour, so keep it running (you'll see some chart from gnuplot) 
+this can take quite some time - up to half an hour, so keep it running (you'll see some charts from gnuplot) 
 See result - specially check of classification accuracy, in ideal case you should see:
-Accuracy = 100% (200/200) (classification)
+Accuracy = 100% (200/200) (classification), but 90% is good if audio captchas are noisy.
+(with 90% chance on one letter you have app. 66% change to recognize 4 letters captcha - 
+and for 3 attempts you have 96% chance to succeed)
 
 after this we have all we need, just copy
 cp xxx.cfg ../../xxx.cfg
@@ -150,9 +155,12 @@ and test if it works:
  
 -----------------------------------------------------------------------
 
-Thanks to authors of all these great tools and libraries: numpy, scipy,  pymad, pyao, pyqt4, pyload, matplotlib 
+Thanks to authors of all these great tools and libraries: numpy, scipy,  pymad, pyao, pyqt4, 
+pyload, matplotlib and libsvm
 
 History:
 4-Apr-13 -  Fixed issues with libsvm seg fault when called from multiple threads
 12-Aug-14 - updated with some fixes - support of wav,  new segmentation algorithm,  pyload plugin update, ...
+16-Apr-2018 - updated to work with Ubuntu 16.04 and recent libraries, 
+              improved segmentation algorithm and samlestoop.py
 

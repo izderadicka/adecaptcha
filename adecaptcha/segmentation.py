@@ -89,34 +89,53 @@ def segment_audio(seg_alg,data_array, sr,  limit =5,  seg_details=None,**kwargs)
 
 @seg_alg('Simple Energy Envelope')
 def segment_audio_ee(data_array, sr,  limit =5,  seg_details=None,
-                  step_sec=0.2, silence_sec=0.1, sound_canvas=0.5):
+                  step_sec=0.2, win_size=0.1, silence_sec=0.1, 
+                  sound_canvas=0.5, num_segments=4):
     step=int(round(step_sec*sr))
     silence=silence_sec*sr
     if sound_canvas:
         sound_canvas=int(round(silence*sound_canvas))
-    env=calc_energy_env(data_array,sr)  
+    env=calc_energy_env(data_array,sr, win_size)  
     env_len=len(env)
-    i=0 
-    in_segment=False
-    seg_start=0
-    segments=[]
-    silence_detected=0
-    while i<env_len :
-        if env[i]>limit:
-            silence_detected=0
-        if env[i]<=limit and in_segment:
-            silence_detected+=1
-            if silence_detected>=silence:
-                in_segment=False
-                segments.append([seg_start, i-silence])
-                
-        elif env[i]>limit and not in_segment:
-            in_segment=True
-            seg_start=i
-            i+=step
-        i+=1
-    if in_segment:
-        segments.append([seg_start, len(env)-1])
+    limit_orig = limit
+    # now try adatively decrease limit, if not found required number of segments
+    while limit > limit_orig / 2.0:
+        i=0 
+        in_segment=False
+        seg_start=0
+        segments=[]
+        silence_detected=0
+        while i<env_len :
+            if env[i]>limit:
+                silence_detected=0
+            if env[i]<=limit and in_segment:
+                silence_detected+=1
+                if silence_detected>=silence:
+                    in_segment=False
+                    segments.append([seg_start, i-silence])
+                    
+            elif env[i]>limit and not in_segment:
+                in_segment=True
+                seg_start=i
+                i+=step
+            i+=1
+        if in_segment:
+            segments.append([seg_start, len(env)-1])
+        if num_segments <= 0 or len(segments) == num_segments: 
+            break    
+        if num_segments>0 and len(segments) > num_segments:
+            #lets select only n with greatest energy
+            energies = []
+            for seg in segments:
+                e = env[seg[0]:seg[1]].sum()
+                energies.append((e,seg))
+            energies.sort(reverse=True)
+            
+            segments = [s for (e,s) in energies[:num_segments]]
+            segments.sort()
+            break
+        limit = limit - limit_orig / 10.0
+    
     segments=numpy.array(segments, dtype=numpy.int)
     
     return cut_segments(data_array, sr, segments, None, sound_canvas, seg_details)

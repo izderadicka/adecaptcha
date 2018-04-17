@@ -16,6 +16,7 @@ except:
 from segmentation import segment_audio    
 import numpy
 import logging, types
+from collections import defaultdict
 
 logger=logging.getLogger()
 
@@ -26,11 +27,13 @@ def analyze_segments(mp3_files, dir='', progress_callback=None,
                     start_index=None, end_index=None):
     seg_length=[]
     seg_no=[]
+    seg_count = defaultdict(lambda : 0)
     for i,mp3_file in enumerate(mp3_files):  
         f=os.path.join(dir, mp3_file)
         a, sr= load_audio_sample(f)
         segments=segment_audio(seg_alg, a, sr, limit, **params )
         seg_no.append(len(segments))
+        seg_count[len(segments)]+=1
         seg_length.extend([float(len(s))/float(sr) for s in segments[start_index: end_index]])
         if progress_callback:
             try:
@@ -40,8 +43,14 @@ def analyze_segments(mp3_files, dir='', progress_callback=None,
     seg_length=numpy.array(seg_length, dtype=numpy.float)
     seg_no=numpy.array(seg_no, dtype=numpy.int)
     
+    counts = sorted(seg_count.items())
+    
     res= "Segments number per sample: min=%d, max=%d, mean=%.4f std=%.4f var=%.4f\n" % \
         (seg_no.min(), seg_no.max(), seg_no.mean(), seg_no.std(), seg_no.var())
+    res+= "Segment counts: "
+    for (s,c) in counts:
+        res+="%d:%d, "% (s,c)
+    res+="\n"
     if len(seg_length):
         res+="Segments lengths(sec): min=%.4f, max=%.4f, mean=%.4f std=%.4f var=%.4f\n" % \
         (seg_length.min(), seg_length.max(), seg_length.mean(), seg_length.std(), seg_length.var())

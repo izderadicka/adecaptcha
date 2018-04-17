@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
         self.assertTrue(len(l)>=2)
         ld=dict(l)
         x=ld['Simple Energy Envelope'].alg_default_params
-        self.assertEqual(len(x), 3)
+        self.assertEqual(len(x), 5)
         self.assertTrue(x['step_sec']) 
         self.assertEqual(ld['Simple Energy Envelope'].__name__, 'segment_audio_ee')
 
@@ -32,6 +32,15 @@ class Test(unittest.TestCase):
         sd=[]
         segs=audiolib.segment_audio('segment_audio_ee',a, sr, limit =5,  seg_details=sd,
             silence_sec=0.1, step_sec=0.2)
+        print sd
+        self.assertEqual(len(sd),4)
+        
+    def test2(self):
+        a,sr=audiolib.load_audio_sample('test2.mp3')
+        sd=[]
+        segs=audiolib.segment_audio('segment_audio_ee',a, sr, limit = 0.65,  seg_details=sd,
+            step_sec=0.2, win_size=0.1, silence_sec=0.1, 
+                  sound_canvas=0.5, num_segments=4)
         print sd
         self.assertEqual(len(sd),4)
         
