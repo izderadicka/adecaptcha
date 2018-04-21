@@ -112,7 +112,7 @@ def segment_audio_ee(data_array, sr,  limit =5,  seg_details=None,
                 silence_detected+=1
                 if silence_detected>=silence:
                     in_segment=False
-                    segments.append([seg_start, i-silence])
+                    segments.append([seg_start, int(i-silence)])
                     
             elif env[i]>limit and not in_segment:
                 in_segment=True
