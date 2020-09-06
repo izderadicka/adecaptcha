@@ -94,3 +94,6 @@ target/
 /.project
 /.pydevproject
 /private/
+
+/adecaptcha/svm
+
