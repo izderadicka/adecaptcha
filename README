@@ -12,16 +12,18 @@ Some description (of older version) is here:   http://old.zderadicka.eu/adecaptc
 How to make it work (on linux) - uloz.to capchas recognition with PyLoad:
 ------------------------------------------------------------------------
 
+It's still Python2, so make sure python2 is installed (which is not by default in new distributions, as it's EOLed)
+
 git clone https://github.com/izderadicka/adecaptcha.git 
 
 cd adecaptcha/
 
-#concerning pymad I tested with manually build library - see below
-sudo apt-get install build-essential python-dev python-numpy python-scipy python-pymad python-pyao python-pip
-sudo pip install cython
+# concerning pymad I tested with manually build library - see below
+# sudo apt-get install build-essential python-dev python-numpy python-scipy python-pymad python-pyao python-pip
+sudo pip2 install cython numpy scipy lxml
 
 #build cython extensions
-python setup.py build_ext --inplace
+python2 setup.py build_ext --inplace
 
 cd adecaptcha/libsvm-3.17/
 
@@ -53,8 +55,8 @@ however pyao and pymad should be installed from source:
 sudo apt-get install libmad0-dev
 git clone --depth 1 https://github.com/jaqx0r/pymad
 cd pymad/
-python config_unix.py 
-python setup.py install
+python2 config_unix.py 
+sudo python2 setup.py install
 
 cd ..
 
